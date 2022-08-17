@@ -11,10 +11,10 @@ const chats = {}
 
 
 const startGame = async (chatId) => {
-    await bot.sendMessage(chatId, `Сейчас я загадаю цифру от 0 до 9, а ты должен ее угадать!`);
+    await bot.sendMessage(chatId, `I am Angry Chica, a bot developing in beta version. As for now I will give you 9 nubers to guess and you should pick the right one! Let's see if you can win!`);
     const randomNumber = Math.floor(Math.random() * 10)
     chats[chatId] = randomNumber;
-    await bot.sendMessage(chatId, 'Отгадывай', gameOptions);
+    await bot.sendMessage(chatId, 'Guess now', gameOptions);
 }
 
 const start = async () => {
@@ -23,13 +23,13 @@ const start = async () => {
         await sequelize.authenticate()
         await sequelize.sync()
     } catch (e) {
-        console.log('Подключение к бд сломалось', e)
+        console.log('Oops, something went wrong,sorry', e)
     }
 
     bot.setMyCommands([
-        {command: '/start', description: 'Начальное приветствие'},
-        {command: '/info', description: 'Получить информацию о пользователе'},
-        {command: '/game', description: 'Игра угадай цифру'},
+        {command: '/start', description: 'Hello!'},
+        {command: '/info', description: 'Information about user'},
+        {command: '/game', description: 'Guess the number game'},
     ])
 
     bot.on('message', async msg => {
@@ -44,14 +44,14 @@ const start = async () => {
             }
             if (text === '/info') {
                 const user = await UserModel.findOne({chatId})
-                return bot.sendMessage(chatId, `Тебя зовут ${msg.from.first_name} ${msg.from.last_name}, в игре у тебя правильных ответов ${user.right}, неправильных ${user.wrong}`);
+                return bot.sendMessage(chatId, `Your name is ${msg.from.first_name} ${msg.from.last_name}, you got the guessed nimbers of ${user.right}, and mistargeted ${user.wrong}`);
             }
             if (text === '/game') {
                 return startGame(chatId);
             }
-            return bot.sendMessage(chatId, 'Я тебя не понимаю, попробуй еще раз!)');
+            return bot.sendMessage(chatId, 'I dont understand you, please try again');
         } catch (e) {
-            return bot.sendMessage(chatId, 'Произошла какая то ошибочка!)');
+            return bot.sendMessage(chatId, 'Ooops, something went wrong');
         }
 
     })
@@ -65,10 +65,10 @@ const start = async () => {
         const user = await UserModel.findOne({chatId})
         if (data == chats[chatId]) {
             user.right += 1;
-            await bot.sendMessage(chatId, `Поздравляю, ты отгадал цифру ${chats[chatId]}`, againOptions);
+            await bot.sendMessage(chatId, `Congratulations! You have guessed the number! ${chats[chatId]}`, againOptions);
         } else {
             user.wrong += 1;
-            await bot.sendMessage(chatId, `К сожалению ты не угадал, бот загадал цифру ${chats[chatId]}`, againOptions);
+            await bot.sendMessage(chatId, `Unfortunately, you didn't guess the number ${chats[chatId]} :(`, againOptions);
         }
         await user.save();
     })
